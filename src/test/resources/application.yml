@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: testing-framework
+
+qa:
+  api:
+   url:  ${QA_API_URL:https://apidojo-yahoo-finance-v1.p.rapidapi.com}
+
+customers: ${CUSTOMERS:1}
+
+api_key:
+  customerOne:
+    valid:
+      request: ${API_KEY_CUSTOMER_ONE_VALID_REQUEST:55d3fff386msh1b3b8293e58a587p196572jsn14631d1dfe53}
+    unauthorized:
+      request: ${API_KEY_CUSTOMER_ONE_UNAUTHORIZED_REQUEST:55d3fff386msh1b3b8293e58a587p196572jsn14631d1dfe51}
+    expired:
+      request: ${API_KEY_CUSTOMER_ONE_EXPIRED_REQUEST:}
