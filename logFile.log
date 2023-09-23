@@ -1,2 +1,0 @@
-2023-09-19 15:22:53,976  INFO [Test worker] Log4jTestWatcher:29 - Success: Search with interval 1 minute - response 200 RequestParams[interval=1m, range=1d, customer=1]
-2023-09-19 15:22:55,707  INFO [Test worker] Log4jTestWatcher:29 - Success: Search with interval 1 minute - response 200 RequestParams[interval=1m, range=5d, customer=1]

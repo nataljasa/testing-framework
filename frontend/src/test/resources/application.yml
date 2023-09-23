@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: testing-framework
+
+qa:
+  ui:
+    url: ${QA_UI_URL:https://finance.yahoo.com/chart/NVDA}
+
