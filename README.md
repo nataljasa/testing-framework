@@ -17,7 +17,7 @@
 ## How to run test
 
 ```
-gradlew clean run runApiTests runUiTests 
+gradlew clean runApiTests runUiTests 
 ```
 or run the script
 
