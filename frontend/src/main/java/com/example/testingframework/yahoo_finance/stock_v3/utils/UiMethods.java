@@ -3,14 +3,10 @@ package com.example.testingframework.yahoo_finance.stock_v3.utils;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
-import com.codeborne.selenide.WebDriverRunner;
 import com.codeborne.selenide.ex.UIAssertionError;
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
-import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +18,7 @@ import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
-public class Methods {
+public class UiMethods {
 
     public static void openBrowserIfNeeded() {
         if (getWebDriver().toString().contains("null")) {
@@ -41,10 +37,9 @@ public class Methods {
         }
     }
 
-    @Step("Search by {0} and click")
+    @Step("Search by text {0} and click")
     public static void searchByTextAndClick(String text) {
         var elements = new ArrayList<>($$(byText(text)).filter(visible));
-
         if (!elements.isEmpty()) {
             elements.get(0).scrollIntoView(false).click();
         }
@@ -52,9 +47,8 @@ public class Methods {
         waitUntilPageIsReady();
     }
 
-    @Step("Perform click")
+    @Step("Search by element {0} and click")
     public static void searchByElementAndClick(SelenideElement element) {
-        waitUntilPageIsReady();
         var elements = new ArrayList<>($$(Collections.singleton(element)).filter(visible));
         if (!elements.isEmpty()) {
             elements.get(0).scrollIntoView(false).click();
@@ -71,9 +65,7 @@ public class Methods {
             if (js.executeScript("return document.readyState").toString().equals("complete")) {
                 if (!isJQuery) {
                     return true;
-                } else if ((Long) js.executeScript("return jQuery.active") == 0) {
-                    return true;
-                }
+                } else return (Long) js.executeScript("return jQuery.active") == 0;
             }
             return false;
         });

@@ -1,6 +1,6 @@
 package com.example.testingframework.yahoo_finance.stock_v3.parametrized;
 
-import com.example.testingframework.yahoo_finance.stock_v3.model.model.MarketDataPoints;
+import com.example.testingframework.yahoo_finance.stock_v3.model.MarketDataPoints;
 import com.example.testingframework.yahoo_finance.stock_v3.utils.Constants;
 
 
@@ -16,17 +16,17 @@ import java.io.IOException;
 
 
 
-public class JsonFileArgumentsProvider implements ArgumentsProvider {
+public class IntervalOneDayArgumentsProvider implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws IOException {
-        final String pathToFile = FileUtils.getPathToFile(Constants.JSON_FILE_PATH);
+        final String pathToFile = FileUtils.getPathToFile(Constants.MARKET_DATA_INTERVAL_1_DAY_FILE);
         Map<String, MarketDataPoints> marketData = FileUtils.readFromJsonFile(pathToFile);
 
         // Convert MarketDataPoints to RequestParams1 records
         Stream<Arguments> argumentsStream = marketData.entrySet().stream()
                 .map(entry -> {
                     MarketDataPoints marketDataPoints = entry.getValue();
-                    RequestParams1 requestParams = new RequestParams1(
+                    DataToVerify requestParams = new DataToVerify(
                             entry.getKey(),
                             marketDataPoints.getOpen(),
                             marketDataPoints.getVolume(),

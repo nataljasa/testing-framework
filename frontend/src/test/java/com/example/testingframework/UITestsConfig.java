@@ -49,36 +49,13 @@ public abstract class UITestsConfig {
     @BeforeAll
     public void setUpAll() {
         WebDriverManager.chromedriver().setup();
-
         ChromeOptions options = new ChromeOptions();
-
         options.setHeadless(false);
         options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
         options.addArguments("--remote-allow-origins=*");
-        options
-                .addArguments("--lang=es");
-        options.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
-        options.setExperimentalOption("useAutomationExtension", false);
-        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-        options.addArguments("--disable-gpu", "--window-size=1400x1900", "--allow-running-insecure-content",
-                "--ignore-certificate-errors", "--disable-extensions", "--no-sandbox", "--disable-dev-shm-usage",
-                "--disable-web-security", "--start-maximized",
-                "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-                "--disable-blink-features=AutomationControlled");
-        // Disable cookies
-        options.addArguments("--disable-extensions");
-        options.addArguments("--disable-popup-blocking");
-        options.addArguments("--disable-plugins-discovery");
-        options.addArguments("--disable-save-password-bubble");
-        options.addArguments("--disable-notifications");
-        options.addArguments("--disable-infobars");
-        options.addArguments("--disable-session-crashed-bubble");
+        Configuration.timeout = 10000;
         Configuration.browserCapabilities = options;
-        //Configuration.browserSize = "1920x1080";
-       // WebDriverRunner.setWebDriver(new ChromeDriver(options));
-
         RestAssured.baseURI = baseApiUrl;
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails(LogDetail.ALL);
         open(RestAssured.baseURI);
         getWebDriver().manage().window().maximize();
 

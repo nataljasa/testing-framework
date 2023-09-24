@@ -28,19 +28,10 @@ dependencies {
             'io.rest-assured:rest-assured:4.5.1',
             'org.junit.jupiter:junit-jupiter-params:5.8.2',
             'log4j:log4j:1.2.17',
-            'com.google.auto.service:auto-service:1.0.1',
             'org.slf4j:slf4j-jdk14:1.7.36',
-            'org.awaitility:awaitility:4.1.1',
             'io.qameta.allure:allure-rest-assured:2.14.0',
-            'org.json:json:20200518',
-            'org.springframework:spring-jdbc:5.3.16',
-            'org.springframework:spring-context:5.3.16',
-            'org.springframework:spring-beans:5.3.16',
-            'org.springframework:spring-core:5.3.16',
-            'org.springframework:spring-test:5.3.16',
             'org.assertj:assertj-core:3.22.0',
             'commons-dbcp:commons-dbcp:1.4',
-            'org.yaml:snakeyaml:1.30',
             'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.2',
             'io.jsonwebtoken:jjwt:0.9.1',
             'org.kohsuke:github-api:1.301',
@@ -52,12 +43,9 @@ dependencies {
     implementation project("::common")
 
     // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2',
-            'mysql:mysql-connector-java:8.0.28'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2',
-            'org.junit.platform:junit-platform-engine:1.9.2',
-            'org.junit.platform:junit-platform-launcher:1.9.2'
+
 }
 
 test {
@@ -67,17 +55,31 @@ test {
     //systemProperties = customSystemProperties
 }
 
-allure {
 
+task runApiTests(type: Test) {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+        includeTags "apiTests"
+    }
+
+
+}
+
+tasks.withType(DependencyInsightReportTask) {
+    enabled = false
+}
+
+
+/*
+allure {
     configuration = "testImplementation"
     autoconfigure = true
     downloadLink = "https://github.com/allure-framework/allure2/releases/download/2.13.9/allure-2.13.9.zip"
     aspectjweaver = true
-/*	resultsDir = file("../allure-results/${allureResultsEndpoint}")
-	reportDir = file("../reports/allure-report/${allureResultsEndpoint}")*/
     version = '2.13.9' // Allure Version
-    clean = true
+
     useJUnit5 {
         version = '2.8.1' // Allure Version
     }
 }
+*/

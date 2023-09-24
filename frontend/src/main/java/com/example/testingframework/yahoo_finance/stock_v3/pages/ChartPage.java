@@ -14,5 +14,8 @@ public class ChartPage {
     public static final  SelenideElement chartDataSubHolder = $(".stx-subholder");
     public static final  SelenideElement mainChartHolder = $(".stx-holder.stx-panel-chart");
     public static final  SelenideElement selectedDate = $(".stx-float-date.floatDate");
+    public static final  SelenideElement acceptAllCookies = $("button.btn.secondary.accept-all");
+    public static final SelenideElement scrollDownButton = $("#scroll-down-btn");
+
 
 }

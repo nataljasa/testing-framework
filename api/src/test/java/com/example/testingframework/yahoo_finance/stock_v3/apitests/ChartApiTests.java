@@ -3,14 +3,15 @@ package com.example.testingframework.yahoo_finance.stock_v3.apitests;
 import com.example.testingframework.ApiTestsConfig;
 import com.example.testingframework.yahoo_finance.stock_v3.config.Log4jTestWatcher;
 
-import com.example.testingframework.yahoo_finance.stock_v3.model.model.MarketDataPoints;
-import com.example.testingframework.yahoo_finance.stock_v3.model.model.YahooFinanceAPIRequest;
-import com.example.testingframework.yahoo_finance.stock_v3.parametrized.GetChatWithRangeOneDayOneParamProvider;
-import com.example.testingframework.yahoo_finance.stock_v3.parametrized.GetChatWithRangeOneDayParamsProvider;
+import com.example.testingframework.yahoo_finance.stock_v3.model.MarketDataPoints;
+import com.example.testingframework.yahoo_finance.stock_v3.model.YahooFinanceAPIRequest;
+import com.example.testingframework.yahoo_finance.stock_v3.parametrized.GetChatWithIntervalOneDayOneParamProvider;
+import com.example.testingframework.yahoo_finance.stock_v3.parametrized.GetChatWithIntervalOneDayParamsProvider;
 import com.example.testingframework.yahoo_finance.stock_v3.parametrized.RequestParams;
 
 import com.example.testingframework.yahoo_finance.stock_v3.utils.Constants;
 import com.example.testingframework.yahoo_finance.stock_v3.utils.FileUtils;
+import com.example.testingframework.yahoo_finance.stock_v3.utils.tags.ApiTests;
 import com.jayway.jsonpath.JsonPath;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
@@ -24,18 +25,16 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
+import static com.example.testingframework.yahoo_finance.stock_v3.utils.FileUtils.createFileIfNotExists;
+import static com.example.testingframework.yahoo_finance.stock_v3.utils.NumberUtils.parseDoubleList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(Log4jTestWatcher.class)
@@ -43,14 +42,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Execution(ExecutionMode.SAME_THREAD)
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ApiTests
 public class ChartApiTests extends ApiTestsConfig {
 
     private static final Logger LOG = Logger.getLogger(ChartApiTests.class);
 
     @Order(1)
     @ParameterizedTest(name = "Search with expired key - authentication error {0}")
-    @ArgumentsSource(GetChatWithRangeOneDayOneParamProvider.class)
-    @Execution(ExecutionMode.CONCURRENT)
+    @ArgumentsSource(GetChatWithIntervalOneDayOneParamProvider.class)
     public void searchWithExpiredKey_checkResult_expectAuthenticationError(RequestParams params) {
         //given
         //when
@@ -65,8 +64,7 @@ public class ChartApiTests extends ApiTestsConfig {
 
     @Order(2)
     @ParameterizedTest(name = "Search with unauthorized key - authorization error {0}")
-    @ArgumentsSource(GetChatWithRangeOneDayOneParamProvider.class)
-    @Execution(ExecutionMode.CONCURRENT)
+    @ArgumentsSource(GetChatWithIntervalOneDayOneParamProvider.class)
     public void searchWithUnauthorizedKey_checkResult_expectAuthorizationError(RequestParams params) {
         //given
         //when
@@ -80,10 +78,9 @@ public class ChartApiTests extends ApiTestsConfig {
     }
 
     @Order(3)
-    @ParameterizedTest(name = "Search with interval 1 minute - response 200 {0}")
-    @ArgumentsSource(GetChatWithRangeOneDayParamsProvider.class)
-    @Execution(ExecutionMode.CONCURRENT)
-    public void searchWithIntervalOneMinute_checkResult_expect200(RequestParams params) throws IOException {
+    @ParameterizedTest(name = "Search with interval 1 day - response 200 {0}")
+    @ArgumentsSource(GetChatWithIntervalOneDayParamsProvider.class)
+    public void searchWithIntervalOneDay_checkResult_expect200(RequestParams params) throws IOException {
         // Given
         String customer = params.customer();
         String interval = params.interval();
@@ -109,65 +106,47 @@ public class ChartApiTests extends ApiTestsConfig {
         assertEquals(range, resultRange, "Wrong error code");
         assertEquals(interval, resultDataGranularity, "Wrong error code");
 
-        // Handle data reading and writing
         handleMarketDataUpdate(indicatorsData, metaData);
     }
 
 
-// ...
-
     private void handleMarketDataUpdate(Map<String, Object> indicatorsData, Map<String, Object> metaData) throws IOException {
-        // Define the path to the JSON file
-        String fileName = Constants.JSON_FILE_PATH;
+        Path jsonFilePath = Paths.get(FileUtils.getPathToFile(Constants.MARKET_DATA_INTERVAL_1_DAY_FILE));
 
-        // Create a Path object for the file
-        Path jsonFilePath = Paths.get(FileUtils.getPathToFile(fileName));
-        // Check if the file exists, and if not, create it
-        if (!Files.exists(jsonFilePath)) {
-            try {
-                Files.createFile(jsonFilePath);
-            } catch (IOException e) {
-                // Handle any potential file creation errors here
-                e.printStackTrace();
-                return; // Exit the method if file creation fails
-            }
-        }
-        Map<String, MarketDataPoints> marketData = new HashMap<>();
+        createFileIfNotExists(jsonFilePath);
+
+        Map<String, MarketDataPoints> marketData = readMarketDataFromFile(jsonFilePath);
+
+        String marketDataKey = getMarketDataKey(metaData);
+
+        MarketDataPoints marketDataPoints = createMarketDataPoints(indicatorsData);
+
+        updateMarketData(marketData, marketDataKey, marketDataPoints);
+
+        writeMarketDataToFile(marketData, jsonFilePath);
+    }
+
+
+    private Map<String, MarketDataPoints> readMarketDataFromFile(Path jsonFilePath) throws IOException {
         if (Files.size(jsonFilePath) > 0) {
-            // Read existing data from the JSON file
-            marketData = FileUtils.readFromJsonFile(FileUtils.getPathToFile(fileName));
+            return FileUtils.readFromJsonFile(FileUtils.getPathToFile(jsonFilePath.toString()));
         }
+        return new HashMap<>();
+    }
 
-        // Update the marketData with new data
-        String marketDataKey = JsonPath.read(metaData, "$.range") + "_" + JsonPath.read(metaData, "$.dataGranularity");
-        // Assuming you have a list of Double values for adjclose
+    private String getMarketDataKey(Map<String, Object> metaData) {
+        return JsonPath.read(metaData, "$.range") + "_" + JsonPath.read(metaData, "$.dataGranularity");
+    }
 
-        List<Double> adjcloseValues = Arrays.asList(JsonPath.read(indicatorsData, "$.adjclose[0].adjclose")
-                        .toString().replaceAll("[\\[\\]]", "").split(",")).stream()
-                .map(value -> roundToTwoDecimalPlaces(value.toString()))
-                .collect(Collectors.toList());
-        List<Double> openv = Arrays.asList(JsonPath.read(indicatorsData, "$.quote[0].open")
-                        .toString().replaceAll("[\\[\\]]", "").split(",")).stream()
-                .map(value -> roundToTwoDecimalPlaces(value.toString()))
-                .collect(Collectors.toList());
-        List<Double> volumev = Arrays.asList(JsonPath.read(indicatorsData, "$.quote[0].volume")
-                        .toString().replaceAll("[\\[\\]]", "").split(",")).stream()
-                .map(value -> roundToTwoDecimalPlaces(value.toString()))
-                .collect(Collectors.toList());
-        List<Double> closev= Arrays.asList(JsonPath.read(indicatorsData, "$.quote[0].close")
-                        .toString().replaceAll("[\\[\\]]", "").split(",")).stream()
-                .map(value -> roundToTwoDecimalPlaces(value.toString()))
-                .collect(Collectors.toList());
-        List<Double> highv = Arrays.asList(JsonPath.read(indicatorsData, "$.quote[0].high")
-                        .toString().replaceAll("[\\[\\]]", "").split(",")).stream()
-                .map(value -> roundToTwoDecimalPlaces(value.toString()))
-                .collect(Collectors.toList());
-        List<Double> lowv = Arrays.asList(JsonPath.read(indicatorsData, "$.quote[0].low")
-                        .toString().replaceAll("[\\[\\]]", "").split(",")).stream()
-                .map(value -> roundToTwoDecimalPlaces(value.toString()))
-                .collect(Collectors.toList());
+    private MarketDataPoints createMarketDataPoints(Map<String, Object> indicatorsData) {
+        List<Double> adjcloseValues = parseDoubleList(indicatorsData, "$.adjclose[0].adjclose");
+        List<Double> openv = parseDoubleList(indicatorsData, "$.quote[0].open");
+        List<Double> volumev = parseDoubleList(indicatorsData, "$.quote[0].volume");
+        List<Double> closev = parseDoubleList(indicatorsData, "$.quote[0].close");
+        List<Double> highv = parseDoubleList(indicatorsData, "$.quote[0].high");
+        List<Double> lowv = parseDoubleList(indicatorsData, "$.quote[0].low");
 
-        MarketDataPoints marketDataPoints = MarketDataPoints.builder()
+        return MarketDataPoints.builder()
                 .open(openv)
                 .volume(volumev)
                 .close(closev)
@@ -175,54 +154,17 @@ public class ChartApiTests extends ApiTestsConfig {
                 .low(lowv)
                 .adjclose(adjcloseValues)
                 .build();
+    }
 
+    private void updateMarketData(Map<String, MarketDataPoints> marketData, String marketDataKey, MarketDataPoints marketDataPoints) {
         marketData.put(marketDataKey, marketDataPoints);
+    }
 
-        // Serialize the updated data to JSON and write it back to the file
+    private void writeMarketDataToFile(Map<String, MarketDataPoints> marketData, Path jsonFilePath) throws IOException {
         FileUtils.writeToJsonFile(marketData, jsonFilePath.toString());
     }
 
 
-    private double roundToTwoDecimalPlaces(Object value) {
-        if (value instanceof Number) {
-            double doubleValue = ((Number) value).doubleValue();
-            // Round up to two decimal places using RoundingMode.CEILING
-            BigDecimal bd = new BigDecimal(doubleValue);
-            bd = bd.setScale(2, RoundingMode.CEILING);
-
-            // Check if the rounded value is greater than or equal to 1 million
-            if (bd.doubleValue() >= 1000000.0) {
-                // Format the value as millions and return it as a double
-                double formattedValue = bd.doubleValue() / 1000000.0;
-                return formattedValue;
-            } else {
-                // Return the rounded value as a double
-                return bd.doubleValue();
-            }
-        } else if (value instanceof String) {
-            String stringValue = (String) value;
-            try {
-                // Attempt to parse the value as a BigDecimal
-                BigDecimal bd = new BigDecimal(stringValue);
-                bd = bd.setScale(2, RoundingMode.HALF_UP);
-
-                // Check if the rounded value is greater than or equal to 1 million
-                if (bd.doubleValue() >= 1000000.0) {
-                    // Format the value as millions and return it as a double
-                    double formattedValue = bd.doubleValue() / 1000000.0;
-                    return formattedValue;
-                } else {
-                    // Return the rounded value as a double
-                    return bd.doubleValue();
-                }
-            } catch (NumberFormatException e) {
-                // Handle invalid input gracefully, returning 0.00 as a default double.
-                return 0.00;
-            }
-        }
-        // Handle other types or invalid input gracefully, returning 0.00 as a default double.
-        return 0.00;
-    }
 
 
 }

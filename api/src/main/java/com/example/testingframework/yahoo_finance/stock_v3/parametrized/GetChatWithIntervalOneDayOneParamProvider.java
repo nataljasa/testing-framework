@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import static com.example.testingframework.yahoo_finance.stock_v3.request.RapidApiClientResolverImpl.customers;
 
-public class GetChatWithRangeOneDayOneParamProvider implements ArgumentsProvider {
+public class GetChatWithIntervalOneDayOneParamProvider implements ArgumentsProvider {
 
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) {

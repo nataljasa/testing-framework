@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import java.util.List;
 
-public class GetChatWithRangeOneDayParamsProvider implements ArgumentsProvider {
+public class GetChatWithIntervalOneDayParamsProvider implements ArgumentsProvider {
 
     private static final String interval = "1d";
 

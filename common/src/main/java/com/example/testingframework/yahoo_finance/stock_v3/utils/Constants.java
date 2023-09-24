@@ -4,5 +4,5 @@ public class Constants {
     public static final String CHART_GET_ENDPOINT = "/stock/v3/get-chart";
     public static final String CHART_SYMBOL = "NVDA";
     public static final String CHART_NAME = "NVIDIA Corporation (NVDA)";
-    public static final String JSON_FILE_PATH = "market_data.json";
+    public static final String MARKET_DATA_INTERVAL_1_DAY_FILE = "market_data_interval_1d.json";
 }

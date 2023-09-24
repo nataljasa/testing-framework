@@ -3,6 +3,7 @@ package com.example.testingframework;
 import com.example.testingframework.yahoo_finance.stock_v3.config.Log4jTestWatcher;
 
 import com.example.testingframework.yahoo_finance.stock_v3.request.RapidApiClientResolver;
+import com.example.testingframework.yahoo_finance.stock_v3.utils.Constants;
 import com.example.testingframework.yahoo_finance.stock_v3.utils.FileUtils;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
@@ -18,7 +19,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.util.List;
 
-import static com.example.testingframework.yahoo_finance.stock_v3.utils.Constants.JSON_FILE_PATH;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith({Log4jTestWatcher.class})
@@ -52,7 +52,7 @@ public abstract class ApiTestsConfig {
     public void setUpAll() {
         RestAssured.baseURI = baseApiUrl;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails(LogDetail.ALL);
-        FileUtils.clearFile(JSON_FILE_PATH);
+        FileUtils.deleteDataFromJsonFile(FileUtils.getPathToFile(Constants.MARKET_DATA_INTERVAL_1_DAY_FILE));
 
     }
 

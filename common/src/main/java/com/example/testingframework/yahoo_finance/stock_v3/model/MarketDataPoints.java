@@ -1,4 +1,4 @@
-package com.example.testingframework.yahoo_finance.stock_v3.model.model;
+package com.example.testingframework.yahoo_finance.stock_v3.model;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;

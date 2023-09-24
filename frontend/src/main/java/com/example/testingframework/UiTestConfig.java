@@ -13,10 +13,4 @@ import org.springframework.context.annotation.PropertySource;
 @ComponentScan("com.example.testingframework")
 public class UiTestConfig {
 
-  /*  @Bean
-    public Methods methods() {
-
-        return new Methods();
-    }
-*/
 }
