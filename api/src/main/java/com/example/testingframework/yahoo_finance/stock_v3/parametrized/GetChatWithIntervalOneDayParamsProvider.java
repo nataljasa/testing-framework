@@ -20,9 +20,9 @@ public class GetChatWithIntervalOneDayParamsProvider implements ArgumentsProvide
     }
 
     private Stream<Arguments> createArgumentsForCustomer(String customer) {
-        List<String> intervalList = List.of("1mo", "3mo");
+        List<String> rangeList = List.of("1mo", "3mo");
 
-        return intervalList.stream()
+        return rangeList.stream()
                 .map(intervalValue -> Arguments.of(new RequestParams(interval, intervalValue, customer)));
     }
 }
